@@ -10,7 +10,7 @@ const middlewares = require('./middlewares/middlewares');
 const limiter = require('./middlewares/rateLimiter');
 const ErrNotFound = require('./errors/ErrNotFound'); // 404
 
-const { PORT = 3000 } = process.env;
+const { PORT = 4000 } = process.env;
 const app = express();
 
 mongoose

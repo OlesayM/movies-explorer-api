@@ -1,6 +1,6 @@
-const { NODE_ENV, JWT_SECRET } = process.env;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { NODE_ENV, JWT_SECRET } = require('../utils/config');
 const User = require('../models/user');
 const ErrBadRequest = require('../errors/ErrBadRequest'); // 400
 const ErrConflict = require('../errors/ErrConflict'); // 409
@@ -28,16 +28,23 @@ module.exports.getCurrentUser = (req, res, next) => {
 };
 
 module.exports.updateProfile = (req, res, next) => {
-  const { name } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name }, { new: true, runValidators: true })
+  const { name, email } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new ErrNotFound('Пользователь с таким id не найден');
+      throw new ErrNotFound('Пользователь не найден');
     })
-    .then((users) => res.send({ data: users }))
+    .then((user) => res.status(200).send({ user }))
     .catch((err) => {
-      next(err);
+      if (err.code === 11000) {
+        return next(new ErrConflict('Пользователь с таким email уже зарегистрирован'));
+      }
+      if (err.name === 'ValidationError') {
+        return next(new ErrBadRequest('Некорректные данные'));
+      }
+      return next(err);
     });
 };
+
 module.exports.createUser = (req, res, next) => {
   const {
     name, email, password,

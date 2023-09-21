@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const { errors } = require('celebrate');
 const helmet = require('helmet');
 const routes = require('./routes');
@@ -16,6 +17,16 @@ const {
 mongoose.connect(DATA_MOVIES, {
   useNewUrlParser: true,
 });
+
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'https://movie.olesaym.nomoredomainsicu.ru',
+    ],
+    credentials: true,
+  }),
+);
 
 app.use(helmet());
 app.use(limiter);
